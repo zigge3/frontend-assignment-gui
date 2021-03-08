@@ -1,4 +1,4 @@
-import "../styles/globals.css";
+//CSS
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function FrontendAssignmentGUI({ Component, pageProps }) {

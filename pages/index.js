@@ -1,13 +1,32 @@
+//CSS
 import styles from "../styles/Players.module.css";
+
+//Bootstrap
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Button from "react-bootstrap/Button";
+
+//Components
 import PlayerList from "../pages/components/players/player-list";
+
+//React
 import PropTypes from "prop-types";
 
 export default function Players({ players = [] }) {
-  console.log(players);
   return (
-    <div className={styles.container}>
-      <PlayerList players={players} />
-    </div>
+    <Container className={styles.container}>
+      <Row className="mb-3">
+        <Col>
+          <PlayerList players={players} />
+        </Col>
+      </Row>
+      <Row>
+        <Col xs="4">
+          <Button block>Add</Button>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
