@@ -1,7 +1,6 @@
 import "../styles/globals.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-function FrontendAssignmentGUI({ Component, pageProps }) {
+export default function FrontendAssignmentGUI({ Component, pageProps }) {
   return <Component {...pageProps} />;
 }
-
-export default FrontendAssignmentGUI;
