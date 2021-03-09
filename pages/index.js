@@ -1,38 +1,37 @@
 //CSS
 import styles from "../styles/Players.module.css";
-
 //Bootstrap
 import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Button from "react-bootstrap/Button";
-
 //Components
-import PlayerList from "../pages/components/players/player-list";
-
-//React
+import PlayerList from "../components/players/player-list";
+import AddPlayerForm from "../components/players/add-player-form";
+//react
 import PropTypes from "prop-types";
+//utils
+import apiHelper from "../utils/players/api-helper";
+const { GET_PLAYERS, ADD_PLAYER } = apiHelper;
 
 export default function Players({ players = [] }) {
+  const handlePlayerSubmit = async (name) => {
+    console.log(...GET_PLAYERS());
+    const data = await fetch(...ADD_PLAYER(name));
+    //console.log(data);
+  };
   return (
     <Container className={styles.container}>
-      <Row className="mb-3">
-        <Col>
-          <PlayerList players={players} />
-        </Col>
-      </Row>
-      <Row>
-        <Col xs="4">
-          <Button block>Add</Button>
-        </Col>
-      </Row>
+      <div className="mb-2">
+        <PlayerList players={players} />
+      </div>
+      <div>
+        <AddPlayerForm onPlayerSubmit={handlePlayerSubmit} />
+      </div>
     </Container>
   );
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   try {
-    const res = await fetch("http://localhost:3000/players");
+    const res = await fetch(...GET_PLAYERS());
     const players = await res.json();
     return {
       props: {

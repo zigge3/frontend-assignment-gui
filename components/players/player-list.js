@@ -3,18 +3,18 @@ import ListGroup from "react-bootstrap/ListGroup";
 import Item from "react-bootstrap/ListGroupItem";
 
 //Components
-import PlayerCard from "../players/player-card";
+import PlayerCard from "./player-card";
 
 //React
 import { Fragment } from "react";
 
-export default function PlayerList({ players = [] }) {
+export default function PlayerList({ players = [], onRemovePlayer }) {
   return (
     <Fragment>
       <ListGroup>
         {players.map(({ name, id }) => (
           <Item key={id}>
-            <PlayerCard name={name} />
+            <PlayerCard name={name} onRemovePlayer={onRemovePlayer} />
           </Item>
         ))}
       </ListGroup>
