@@ -1,23 +1,26 @@
 //React
 import ListGroup from "react-bootstrap/ListGroup";
 import Item from "react-bootstrap/ListGroupItem";
-
 //Components
 import PlayerCard from "./player-card";
 
-//React
-import { Fragment } from "react";
-
-export default function PlayerList({ players = [], onRemovePlayer }) {
+export default function PlayerList({
+  players = [],
+  onDeletePlayer,
+  onEditPlayerSubmit,
+}) {
   return (
-    <Fragment>
-      <ListGroup>
-        {players.map(({ name, id }) => (
-          <Item key={id}>
-            <PlayerCard name={name} onRemovePlayer={onRemovePlayer} />
-          </Item>
-        ))}
-      </ListGroup>
-    </Fragment>
+    <ListGroup>
+      {players.map(({ name, id }) => (
+        <Item key={id}>
+          <PlayerCard
+            name={name}
+            id={id}
+            onDeletePlayer={onDeletePlayer}
+            onEditPlayerSubmit={onEditPlayerSubmit}
+          />
+        </Item>
+      ))}
+    </ListGroup>
   );
 }
