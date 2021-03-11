@@ -1,7 +1,6 @@
 ## Starting the project
 
-To start the project
-if you have npm 7.x.x that supports workspaces
+To start the project simply...
 
 - npm i
 - npm run dev
