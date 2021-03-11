@@ -2,8 +2,7 @@
 import ListGroup from "react-bootstrap/ListGroup";
 import Item from "react-bootstrap/ListGroupItem";
 //Components
-import PlayerCard from "./player-card";
-
+import PlayerCardItem from "./player-card-item";
 export default function PlayerList({
   players = [],
   onDeletePlayer,
@@ -11,16 +10,17 @@ export default function PlayerList({
 }) {
   return (
     <ListGroup>
-      {players.map(({ name, id }) => (
-        <Item key={id}>
-          <PlayerCard
-            name={name}
-            id={id}
-            onDeletePlayer={onDeletePlayer}
-            onEditPlayerSubmit={onEditPlayerSubmit}
-          />
-        </Item>
-      ))}
+      {players.length
+        ? players.map(({ name, id }) => (
+            <PlayerCardItem
+              key={id}
+              name={name}
+              id={id}
+              onDeletePlayer={onDeletePlayer}
+              onEditPlayerSubmit={onEditPlayerSubmit}
+            />
+          ))
+        : "No players in the list"}
     </ListGroup>
   );
 }

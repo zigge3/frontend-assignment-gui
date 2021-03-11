@@ -2,6 +2,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Control from "react-bootstrap/FormControl";
 import Feedback from "react-bootstrap/Feedback";
 
+//Simple input group for name and lastname
 export default function NameInputGroup({
   firstName,
   lastName,

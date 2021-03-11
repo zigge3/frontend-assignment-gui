@@ -4,7 +4,8 @@ import Col from "react-bootstrap/Col";
 import Control from "react-bootstrap/FormControl";
 import Form from "react-bootstrap/Form";
 import FormGroup from "react-bootstrap/FormGroup";
-import PlayerCard from "./player-card";
+import Feedback from "react-bootstrap/Feedback";
+import PlayerCardItem from "./player-card-item";
 import ListGroupItem from "react-bootstrap/ListGroupItem";
 //React icons
 import { BsSearch } from "react-icons/bs";
@@ -18,6 +19,7 @@ export default function PlayerSearch({
   foundPlayer,
   onDeletePlayer,
   onEditPlayerSubmit,
+  searchPlayerError,
 }) {
   //States
   const [searchId, setSearchId] = useState("");
@@ -44,7 +46,7 @@ export default function PlayerSearch({
               onChange={handleOnSearchChange}
             />
           </Col>
-          <Col>
+          <Col xs="3">
             <TinyIconButton
               ReactIcon={BsSearch}
               buttonProps={{ type: "submit", block: true }}
@@ -52,19 +54,18 @@ export default function PlayerSearch({
               Search
             </TinyIconButton>
           </Col>
+          <Col>{searchPlayerError && "Player not found"}</Col>
         </FormGroup>
       </Form>
       {foundPlayer && (
         <Row>
           <Col>
-            <ListGroupItem>
-              <PlayerCard
-                onDeletePlayer={onDeletePlayer}
-                onEditPlayerSubmit={onEditPlayerSubmit}
-                name={foundPlayer.name}
-                id={foundPlayer.id}
-              ></PlayerCard>
-            </ListGroupItem>
+            <PlayerCardItem
+              onDeletePlayer={onDeletePlayer}
+              onEditPlayerSubmit={onEditPlayerSubmit}
+              name={foundPlayer.name}
+              id={foundPlayer.id}
+            ></PlayerCardItem>
           </Col>
         </Row>
       )}

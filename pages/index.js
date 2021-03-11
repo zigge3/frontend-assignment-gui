@@ -6,12 +6,13 @@ import Container from "react-bootstrap/Container";
 import PlayerList from "../components/players/player-list";
 import AddPlayerForm from "../components/players/add-player-form";
 import PlayerSearch from "../components/players/player-search";
+import Header from "../components/shared/header";
 //react
 import PropTypes from "prop-types";
 import { useState } from "react";
 //utils
 import apiHelper from "../utils/players/api-helper";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 const {
   GET_PLAYERS,
   ADD_PLAYER,
@@ -19,52 +20,98 @@ const {
   EDIT_PLAYER,
   GET_PLAYER,
 } = apiHelper;
+export default function Players({ preFetchedPlayers }) {
+  //States
+  const [searchPlayerId, setSearchPlayerId] = useState();
+  const [searchPlayerError, setSearchPlayerError] = useState();
+  //Fetch player if there is an ID
+  const { data: foundPlayer, error } = useSWR(() =>
+    searchPlayerId.length ? GET_PLAYER(searchPlayerId).key : null
+  );
+  //Fetch players unless it's SSR
+  const { data: players } = useSWR(GET_PLAYERS().key, {
+    initialData: preFetchedPlayers,
+  });
 
-export default function Players() {
-  const fetcher = (...args) => fetch(...args).then((res) => res.json());
-  const { data, error } = useSWR(...GET_PLAYERS(), fetcher);
+  //Check if there where an error fetching player
+  if (error) {
+    //Clear cache for route
+    mutate(GET_PLAYER(searchPlayerId).key, null, true);
+    setSearchPlayerId("");
+    setSearchPlayerError(error);
+  }
 
-  const [foundPlayer, setFoundPlayer] = useState();
-  const [player404, setPlayer404] = useState();
   //Handlers
   const handlePlayerSubmit = async (name) => {
-    const data = await fetch(...ADD_PLAYER(name));
+    const { key, config } = ADD_PLAYER(name);
+    //Interpolate new state, this is abit bold but the entire idea of client interpolation is the wild west so...
+    mutate(GET_PLAYERS().key, [...players, { name, id: "Loading" }], false);
+    //Fetch
+    await fetch(key, config);
+    //Validate
+    mutate(GET_PLAYERS().key);
   };
+
   const handleOnDeletePlayer = async (id) => {
-    const data = await fetch(...DELETE_PLAYER(id));
+    const { key, config } = DELETE_PLAYER(id);
+    //Clear out cache for this player
+    mutate(GET_PLAYER(id).key, null, false);
+    //Interpolate new state
+    const filteredPlayers = players.filter((player) => player.id != id);
+    mutate(GET_PLAYERS().key, [...filteredPlayers], false);
+    //Fetch
+    await fetch(key, config);
+    //Validate
+    mutate(GET_PLAYERS().key);
   };
+
   const handleOnEditPlayerSubmit = async (id, name) => {
-    const data = await fetch(...EDIT_PLAYER(id, name));
+    const { key, config } = EDIT_PLAYER(id, name);
+    //Interpolate new state
+    //Literally yoinked from server file
+    cachePlayer({ id, name });
+    const mappedPlayers = players.map((p) => (p.id == id ? { ...p, name } : p));
+    mutate(GET_PLAYERS().key, [...mappedPlayers], false);
+    //Fetch
+    await fetch(key, config);
+    mutate(GET_PLAYERS().key);
   };
+  //Caches a player incase, the data gets handled by some other call
+  const cachePlayer = (props) => {
+    mutate(GET_PLAYER(props.id).key, { ...props }, false);
+  };
+
   const handleOnPlayerSearch = async (id) => {
-    const res = await fetch(...GET_PLAYER(id));
-    if (!res.ok) {
-      setFoundPlayer();
-      setPlayer404(true);
-      return;
+    /*
+     * If we have this user already, we can interpolate with the data, even if the getPlayer would return more info it's better than nothing
+     */
+    setSearchPlayerError();
+    const interpolateFoundPlayer = players.find((player) => player.id === id);
+    if (interpolateFoundPlayer) {
+      mutate(GET_PLAYER(searchPlayerId).key, { ...interpolateFoundPlayer });
     }
-    setPlayer404(false);
-    const player = await res.json();
-    setFoundPlayer(player);
+    setSearchPlayerId(id);
   };
 
   return (
-    <Container className={styles.container} className="text-center">
-      <h1>Frontend assignment</h1>
+    <Container className={styles.container}>
+      <div className="mb-4 mt-2">
+        <Header />
+      </div>
       <h2>Search player</h2>
-      <div className="mb-2">
+      <div className="mb-4">
         <PlayerSearch
           onPlayerSearch={handleOnPlayerSearch}
           onDeletePlayer={handleOnDeletePlayer}
           onEditPlayerSubmit={handleOnEditPlayerSubmit}
           foundPlayer={foundPlayer}
-          player404={player404}
+          searchPlayerError={searchPlayerError}
         />
       </div>
       <h2>Player list</h2>
-      <div className="mb-2">
+      <div className="mb-4">
         <PlayerList
-          players={data}
+          players={players}
           onDeletePlayer={handleOnDeletePlayer}
           onEditPlayerSubmit={handleOnEditPlayerSubmit}
         />
@@ -75,14 +122,15 @@ export default function Players() {
   );
 }
 
+//Server side fetch players for SSR
 export async function getServerSideProps() {
   try {
-    const res = await fetch(...GET_PLAYERS());
-    const players = await res.json();
+    const res = await fetch(GET_PLAYERS().key);
+    const preFetchedPlayers = await res.json();
     if (!res.ok) throw "Someone made a woopsie";
     return {
       props: {
-        players,
+        preFetchedPlayers,
       },
     };
   } catch (err) {

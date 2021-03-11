@@ -7,41 +7,76 @@ const DEFAULT_OPTIONS = {
 };
 
 export default {
+  //Fetcher for SWR, coppied from SWRs doc, since SWR is agnostic this could be Axios or graphQL etc.
+  fetcher: async (url) => {
+    const res = await fetch(url);
+
+    // If the status code is not in the range 200-299,
+    // we still try to parse and throw it.
+    if (!res.ok) {
+      const error = new Error("An error occurred while fetching the data.");
+      error.status = res.status;
+      throw error;
+    }
+
+    return res.json();
+  },
+
   //Gets a player
-  GET_PLAYERS: () => [`${API_BASE}/players`],
-  //Adds a player with name
-  ADD_PLAYER: (name) => [
-    `${API_BASE}/player`,
-    {
-      ...DEFAULT_OPTIONS,
-      method: "POST",
-      body: JSON.stringify({ name }),
-    },
-  ],
+  GET_PLAYERS: () => {
+    return {
+      key: `${API_BASE}/players`,
+      config: {
+        ...DEFAULT_OPTIONS,
+        method: "GET",
+      },
+    };
+  },
+
+  //Adds a player
+  ADD_PLAYER: (name) => {
+    return {
+      key: `${API_BASE}/player`,
+      config: {
+        ...DEFAULT_OPTIONS,
+        method: "POST",
+        body: JSON.stringify({ name }),
+      },
+    };
+  },
+
   //Deletes a player with id
-  DELETE_PLAYER: (id) => [
-    `${API_BASE}/player/${id}`,
-    {
-      ...DEFAULT_OPTIONS,
-      method: "DELETE",
-      body: JSON.stringify({ id }),
-    },
-  ],
+  DELETE_PLAYER: (id) => {
+    return {
+      key: `${API_BASE}/player/${id}`,
+      config: {
+        ...DEFAULT_OPTIONS,
+        method: "DELETE",
+        body: JSON.stringify({ id }),
+      },
+    };
+  },
+
   //Edits a players name with id
-  EDIT_PLAYER: (id, name) => [
-    `${API_BASE}/player/${id}`,
-    {
-      ...DEFAULT_OPTIONS,
-      method: "PUT",
-      body: JSON.stringify({ id, name }),
-    },
-  ],
+  EDIT_PLAYER: (id, name) => {
+    return {
+      key: `${API_BASE}/player/${id}`,
+      config: {
+        ...DEFAULT_OPTIONS,
+        method: "PUT",
+        body: JSON.stringify({ id, name }),
+      },
+    };
+  },
+
   //Gets a player with id
-  GET_PLAYER: (id) => [
-    `${API_BASE}/player/${id}`,
-    {
-      ...DEFAULT_OPTIONS,
-      method: "GET",
-    },
-  ],
+  GET_PLAYER: (id) => {
+    return {
+      key: `${API_BASE}/player/${id}`,
+      config: {
+        ...DEFAULT_OPTIONS,
+        method: "GET",
+      },
+    };
+  },
 };
